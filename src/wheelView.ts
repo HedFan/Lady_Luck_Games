@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import { Observable, Subject } from 'rxjs';
 
 import {
     SPIN_DURATION,
@@ -7,7 +8,6 @@ import {
     WIN_VALUES_ANGLE,
     BREAKPOINTS, LAST_BREAKPOINT
 } from './configs';
-import {Observable, Subject} from "rxjs";
 
 export class WheelView extends PIXI.Container {
     private readonly _sendWinValueSubject$ = new Subject<{ winValue: number }>();
@@ -46,7 +46,6 @@ export class WheelView extends PIXI.Container {
             return;
         }
         this._wheel.rotation += 0.01 * delta;
-
         if (this._wheel.rotation >= this._stopPosition) {
             this._stopReels();
         }

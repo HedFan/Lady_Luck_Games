@@ -33,18 +33,18 @@ module.exports = (env) => {
             ]
         },
         resolve: {
-            extensions: [".tsx", ".ts", ".js"]
+            extensions: ['.tsx', '.ts', '.js']
         },
        plugins: [
             new webpack.ProvidePlugin({
                 PIXI: 'pixi.js-legacy'
             }),
             new CopyWebpackPlugin([
-                {from: 'resources', to: 'resources'}
+                { from: 'resources', to: 'resources' }
             ]),
             new HtmlWebpackPlugin({
                 inject: false,
-                template: "./index.html"
+                template: './index.html'
             }),
             new TSLintPlugin({
                 files: ['./src/**/*.ts']

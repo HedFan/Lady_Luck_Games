@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 
 import { WheelView } from './wheelView';
-import {WheelTongueView} from "./wheelTongueView";
+import { WheelTongueView } from "./wheelTongueView";
 import { ButtonView } from './buttonView';
 
 export class TestGame {
@@ -49,7 +49,7 @@ export class TestGame {
         });
 
         sendWinValue$.subscribe(({ winValue }) => {
-            this.button.changeWinIndicator(winValue);
+            this.button.showResult(winValue);
             this.button.toggleVisibleText(true);
         });
     }
