@@ -3,6 +3,7 @@ import * as PIXI from 'pixi.js';
 import { WheelView } from './wheelView';
 import { WheelTongueView } from "./wheelTongueView";
 import { ButtonView } from './buttonView';
+import { DebugView } from './debugView';
 
 export class TestGame {
     private app: PIXI.Application;
@@ -10,6 +11,7 @@ export class TestGame {
     private wheel: WheelView;
     private wheelTongue: WheelTongueView;
     private button: ButtonView;
+    private debug: DebugView;
 
     public initialize(): void {
         const appOptions: any = {
@@ -37,25 +39,25 @@ export class TestGame {
         this.wheel = new WheelView(this.app);
         this.wheelTongue = new WheelTongueView(this.app);
         this.button = new ButtonView(this.app);
+        this.debug = new DebugView();
 
         this.container.addChild(this.wheel, this.wheelTongue, this.button);
 
-        const { clickSpinButton$ } = this.button;
+        this.button.clickSpinButton$.subscribe(() => this.startSpin());
 
-        const { sendWinValue$ } = this.wheel;
-
-        clickSpinButton$.subscribe(() => {
-            this.startSpin();
-        });
-
-        sendWinValue$.subscribe(({ winValue }) => {
+        this.wheel.sendWinValue$.subscribe(({ winValue }) => {
             this.button.showResult(winValue);
             this.button.toggleVisibleText(true);
         });
+
+        this.debug.spinWithResult$.subscribe(({ winValue }) => {
+            this.startSpin(winValue);
+            this.button.buttonClicked();
+            this.button.changeButtonStateManually(true);
+        });
     }
 
-    private startSpin(): void {
-        this.wheel.spinWheel();
+    private startSpin(winValue?: number): void {
+        this.wheel.spinWheel(winValue);
     }
-
 }

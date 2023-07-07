@@ -6,7 +6,10 @@ import {
     WIN_VALUES,
     WIN_VALUES_POSITION,
     WIN_VALUES_ANGLE,
-    BREAKPOINTS, LAST_BREAKPOINT
+    BREAKPOINTS,
+    LAST_BREAKPOINT,
+    WHEEL_POSITION,
+    WHEEL_PIVOT, SPEED
 } from './configs';
 
 export class WheelView extends PIXI.Container {
@@ -23,30 +26,28 @@ export class WheelView extends PIXI.Container {
         this._app = app;
         const wheelTexture: PIXI.Texture = PIXI.Texture.from('resources/wheel.png');
         this._wheel = new PIXI.Sprite(wheelTexture);
-        this._wheel.pivot.set(190, 190);
-        this._wheel.x = 400;
-        this._wheel.y = 300;
+        this._wheel.pivot.copyFrom(WHEEL_PIVOT);
+        this._wheel.position.copyFrom(WHEEL_POSITION);
         this.addChild(this._wheel);
         for (let i = 0; i < WIN_VALUES.length; i++) {
             this._buildWinIndicator(i);
         }
     }
 
-    public spinWheel(): void {
+    public spinWheel(winValue?: number): void {
         if (this._isSpinning) {
-          this._preparedToStop();
           return;
         }
         this._isSpinning = true;
-
-        this._spinTimer = setTimeout(() => this._preparedToStop(), SPIN_DURATION);
+        this._spinTimer = setTimeout(() => this._preparedToStop(winValue), SPIN_DURATION);
     }
+
     public updateWheel(delta: number): void {
         if (!this._isSpinning) {
             return;
         }
-        this._wheel.rotation += 0.01 * delta;
-        if (this._wheel.rotation >= this._stopPosition) {
+        this._wheel.rotation += SPEED * delta;
+        if (this._wheel.rotation >= this._stopPosition && (this._stopPosition - this._wheel.rotation + 0.1) >= 0) {
             this._stopReels();
         }
         if (this._wheel.rotation >= LAST_BREAKPOINT) {
@@ -58,7 +59,11 @@ export class WheelView extends PIXI.Container {
         return this._sendWinValueSubject$;
     }
 
-    private _preparedToStop(): void {
+    private _preparedToStop(winValue?: number): void {
+        if (!!winValue) {
+            this._stopPosition = winValue;
+            return;
+        }
         const currentPosition = this._wheel.rotation;
         this._stopPosition = this._findClosesWinValue(currentPosition);
     }

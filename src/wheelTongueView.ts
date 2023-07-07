@@ -14,5 +14,4 @@ export class WheelTongueView extends PIXI.Container {
         this._wheelTongue.y = 100;
         this.addChild(this._wheelTongue);
     }
-
 }

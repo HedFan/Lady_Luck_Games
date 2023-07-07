@@ -1,5 +1,4 @@
 import * as PIXI from 'pixi.js';
-import { Polygon, InteractionEvent } from 'pixi.js';
 import { Subject, fromEvent, Observable } from 'rxjs';
 
 import {
@@ -7,10 +6,13 @@ import {
     buttonHitAreaCoordinates,
     WIN_INDICATOR_POSITION,
     WIN_VALUES,
-    IButtonConfig
+    BUTTON_TEXT,
+    IButtonConfig,
+    BUTTON_PIVOT,
+    BUTTON_POSITION,
+    TEXT_CONTAINER_POSITION
 } from './configs';
 
-const BUTTON_TEXT = 'YOUR WIN:';
 export class ButtonView extends PIXI.Container {
     private readonly _clickSpinButtonSubject$ = new Subject<void>();
     private readonly _app: PIXI.Application;
@@ -23,16 +25,14 @@ export class ButtonView extends PIXI.Container {
         this._app = app;
         const buttonTexture: PIXI.Texture = PIXI.Texture.from('resources/button.png');
         this._button = new PIXI.Sprite(buttonTexture);
-        this._button.pivot.set(113, 55);
-        this._button.x = 400;
-        this._button.y = 550;
-        this._button.interactive = true;
-        this._button.buttonMode = true;
+        this._button.pivot.copyFrom(BUTTON_PIVOT);
+        this._button.position.copyFrom(BUTTON_POSITION);
+        this._button.interactive = this._button.buttonMode = true;
         this._button.cursor = 'pointer';
-        this._button.hitArea = new Polygon(buttonHitAreaCoordinates);
+        this._button.hitArea = new PIXI.Polygon(buttonHitAreaCoordinates);
         this.addChild(this._button);
 
-        this._textContainer.position.set(55, 15);
+        this._textContainer.position.copyFrom(TEXT_CONTAINER_POSITION);
         this._textContainer.visible = false;
         this._button.addChild(this._textContainer);
 
@@ -41,17 +41,25 @@ export class ButtonView extends PIXI.Container {
         this._initWinIndicator();
 
         fromEvent(this._button, 'pointerdown').subscribe(() => {
-            this.toggleButtonState(false);
+            this.buttonClicked();
             this._clickSpinButtonSubject$.next();
-            this.toggleVisibleText(false);
-            this.changeWinIndicator('');
         });
     }
 
     public showResult(value: number | string): void {
-        this.toggleButtonState(true);
         this.changeWinIndicator(value);
+        this.toggleButtonState(true);
+    }
 
+    public buttonClicked(): void {
+        this.toggleButtonState(false);
+        this.toggleVisibleText(false);
+        this.changeWinIndicator('');
+    }
+
+    public changeButtonStateManually(isPressed: boolean): void {
+        const state = isPressed ? 'pointerdown' : 'pointerover';
+        this._buttonInteractiveConfig(state);
     }
 
     public toggleVisibleText(isVisible: boolean): void {
@@ -100,14 +108,15 @@ export class ButtonView extends PIXI.Container {
 
     private toggleButtonState(isActive: boolean): void {
         this._button.interactive = isActive;
+        this.changeButtonStateManually(!isActive);
     }
 
     private _addButtonInteractive(): void {
         this._button
-            .on('pointerdown', (event: InteractionEvent) => this._buttonInteractiveConfig(event.type as keyof IButtonConfig))
-            .on('pointerup', (event: InteractionEvent) => this._buttonInteractiveConfig(event.type as keyof IButtonConfig))
-            .on('pointerover', (event: InteractionEvent) => this._buttonInteractiveConfig(event.type as keyof IButtonConfig))
-            .on('pointerout', (event: InteractionEvent) => this._buttonInteractiveConfig(event.type as keyof IButtonConfig));
+            .on('pointerdown', (event: PIXI.InteractionEvent) => this._buttonInteractiveConfig(event.type as keyof IButtonConfig))
+            .on('pointerup', (event: PIXI.InteractionEvent) => this._buttonInteractiveConfig(event.type as keyof IButtonConfig))
+            .on('pointerover', (event: PIXI.InteractionEvent) => this._buttonInteractiveConfig(event.type as keyof IButtonConfig))
+            .on('pointerout', (event: PIXI.InteractionEvent) => this._buttonInteractiveConfig(event.type as keyof IButtonConfig));
     }
 
     private _buttonInteractiveConfig(event: keyof IButtonConfig) {
