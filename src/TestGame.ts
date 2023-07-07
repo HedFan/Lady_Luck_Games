@@ -33,6 +33,7 @@ export class TestGame {
     }
     public update(deltaTime: number): void {
         this.wheel.updateWheel(deltaTime);
+        this.wheelTongue.updateWheelTongue(deltaTime);
     }
 
     protected loadResources(): void {
@@ -43,11 +44,15 @@ export class TestGame {
 
         this.container.addChild(this.wheel, this.wheelTongue, this.button);
 
+        const { sendWinValue$, sendTongueCollision$ } = this.wheel;
         this.button.clickSpinButton$.subscribe(() => this.startSpin());
 
-        this.wheel.sendWinValue$.subscribe(({ winValue }) => {
+        sendWinValue$.subscribe(({ winValue }) => {
             this.button.showResult(winValue);
             this.button.toggleVisibleText(true);
+        });
+        sendTongueCollision$.subscribe(() => {
+            this.wheelTongue.playCollision();
         });
 
         this.debug.spinWithResult$.subscribe(({ winValue }) => {

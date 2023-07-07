@@ -44,12 +44,13 @@ export const BUTTON_CONFIG: IButtonConfig = {
 export const WHEEL_POSITION: ICoordinates = { x: 400, y: 300 };
 export const WHEEL_PIVOT: ICoordinates = { x: 190, y: 190 };
 export const WIN_VALUES: number[] = [70, 30, 60, 10, 20, 40];
-export const SPEED = 0.06;
+export const SPEED: number = 0.035;
 export const SPIN_DURATION: number = 2000;
 export const WIN_VALUES_POSITION: ICoordinates[] = [{ x: 168, y: 52 }, { x: 59, y: 156 }, { x: 89, y: 281 }, { x: 217, y: 321 }, { x: 321, y: 239 }, { x: 303, y: 110 }];
 export const WIN_VALUES_ANGLE: number[] = [0, 292, 237, 177, 120, 64];
 export const BREAKPOINTS: number[] = [0, 1.16, 2.15, 3.19, 4.17, 5.16, 6.26];
 export const LAST_BREAKPOINT: number = 6.26;
+export const TONGUE_BREAKPOINT: number[] = [0.4, 1.47, 2.5, 3.56, 4.56, 5.6];
 
 // debug giu
 export const GUI_POSITION: ICoordinates = {
@@ -68,4 +69,12 @@ export const enum WinPosition {
 export interface ISectorFolder {
     readonly sectorName: WinPosition;
 }
+
+// wheel tongue
+export const WHEEL_TONGUE_POSITION: ICoordinates = { x: 400, y: 100 };
+export const WHEEL_TONGUE_PIVOT: ICoordinates = { x: 27, y: 20 };
+export const TONGUE_ROTATION = -3;
+
+
+
 
