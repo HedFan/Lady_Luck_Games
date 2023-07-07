@@ -1,6 +1,34 @@
 // buttonView
 export const buttonHitAreaCoordinates = [207, 88, 217, 64, 216, 40, 30, 12, 7, 45, 35, 99, 184, 98, 22, 94, 35, 99, 7, 45, 8, 67, 13, 84, 208, 20, 198, 12, 190, 8, 41, 7, 30, 12, 216, 40, 19, 27, 12, 28, 7, 45, 30, 12];
 export const WIN_INDICATOR_POSITION = { x: 23, y: 20 };
+export interface IButtonConfig {
+    pointerdown: IButtonParameter;
+    pointerup: IButtonParameter;
+    pointerover: IButtonParameter;
+    pointerout: IButtonParameter;
+}
+interface IButtonParameter {
+    tint: number;
+    scale: number;
+}
+export const BUTTON_CONFIG: IButtonConfig = {
+    pointerdown: {
+        tint: 0x7b7b7b,
+        scale: 0.95
+    },
+    pointerup: {
+        tint: 0xbababa,
+        scale: 1
+    },
+    pointerover: {
+        tint: 0xbababa,
+        scale: 1
+    },
+    pointerout: {
+        tint: 0xFFFFFF,
+        scale: 1
+    }
+};
 
 // wheelView
 export const WIN_VALUES = [70, 30, 60, 10, 20, 40];
