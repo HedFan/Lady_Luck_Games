@@ -1,12 +1,16 @@
 import * as PIXI from 'pixi.js';
 
-const SPIN_DURATION: number = 2000;
-const WIN_VALUES = [70, 10, 40, 20, 60, 30];
-const WIN_VALUES_POSITION = [{ x: 168, y: 52 }, { x: 303, y: 110 }, { x: 321, y: 239 }, { x: 217, y: 321 }, { x: 89, y: 281 }, { x: 59, y: 156 }];
-const WIN_VALUES_ANGLE = [0, 64, 120, 177, 237, 292];
-const BREAKPOINTS = [0, 1.16, 2.15, 3.19, 4.17, 5.16, 6.26];
+import {
+    SPIN_DURATION,
+    WIN_VALUES,
+    WIN_VALUES_POSITION,
+    WIN_VALUES_ANGLE,
+    BREAKPOINTS, LAST_BREAKPOINT
+} from './configs';
+import {Observable, Subject} from "rxjs";
 
 export class WheelView extends PIXI.Container {
+    private readonly _sendWinValueSubject$ = new Subject<{ winValue: number }>();
     private readonly _app: PIXI.Application;
     private readonly _wheel: PIXI.Sprite;
     private _isSpinning = false;
@@ -23,15 +27,15 @@ export class WheelView extends PIXI.Container {
         this._wheel.x = 400;
         this._wheel.y = 300;
         this.addChild(this._wheel);
-        for(let i = 0; i < WIN_VALUES.length; i++) {
-            this.buildWinIndicator(i);
+        for (let i = 0; i < WIN_VALUES.length; i++) {
+            this._buildWinIndicator(i);
         }
     }
 
     public spinWheel(): void {
         if (this._isSpinning) {
           this._preparedToStop();
-            return;
+          return;
         }
         this._isSpinning = true;
 
@@ -43,27 +47,32 @@ export class WheelView extends PIXI.Container {
         }
         this._wheel.rotation += 0.01 * delta;
 
-        if(this._wheel.rotation >= this._stopPosition) {
-            this.stopReels();
+        if (this._wheel.rotation >= this._stopPosition) {
+            this._stopReels();
         }
-        if(this._wheel.rotation >= 6.26) {
+        if (this._wheel.rotation >= LAST_BREAKPOINT) {
             this._wheel.rotation = 0;
         }
+    }
 
+    get sendWinValue$(): Observable<{ winValue: number }> {
+        return this._sendWinValueSubject$;
     }
 
     private _preparedToStop(): void {
         const currentPosition = this._wheel.rotation;
-        this._stopPosition = this.findClosesWinValue(currentPosition);
+        this._stopPosition = this._findClosesWinValue(currentPosition);
     }
 
-    private stopReels(): void {
+    private _stopReels(): void {
+        const indexWinValue = this._stopPosition === LAST_BREAKPOINT ? 0 : BREAKPOINTS.indexOf(this._stopPosition);
+        this._sendWinValueSubject$.next({ winValue: WIN_VALUES[indexWinValue] });
         clearTimeout(this._spinTimer);
         this._isSpinning = false;
         this._stopPosition = undefined;
     }
 
-    private buildWinIndicator(index: number): void {
+    private _buildWinIndicator(index: number): void {
         const winText = new PIXI.Text(WIN_VALUES[index].toString(), {
             fontFamily: 'Courier New',
             fontSize: 44,
@@ -80,7 +89,7 @@ export class WheelView extends PIXI.Container {
         this._wheel.addChild(winText);
     }
 
-    private findClosesWinValue(currentValue: number) {
+    private _findClosesWinValue(currentValue: number) {
         if (currentValue > BREAKPOINTS[BREAKPOINTS.length - 1]) {
             return BREAKPOINTS[0];
         }

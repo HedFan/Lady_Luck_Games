@@ -42,11 +42,16 @@ export class TestGame {
 
         const { clickSpinButton$ } = this.button;
 
-        clickSpinButton$.subscribe((value) => {
-            console.log('test', value);
+        const { sendWinValue$ } = this.wheel;
+
+        clickSpinButton$.subscribe(() => {
             this.startSpin();
         });
 
+        sendWinValue$.subscribe(({ winValue }) => {
+            this.button.changeWinIndicator(winValue);
+            this.button.toggleVisibleText(true);
+        });
     }
 
     private startSpin(): void {
