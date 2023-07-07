@@ -1,15 +1,17 @@
 import * as PIXI from 'pixi.js';
 
-export class TestGame {
+import { WheelView } from './wheelView';
+import {WheelTongueView} from "./wheelTongueView";
+import { ButtonView } from './buttonView';
 
+export class TestGame {
     private app: PIXI.Application;
     private container: PIXI.Container;
-    private wheel: PIXI.Sprite;
-    private wheelTongue: PIXI.Sprite;
-    private button: PIXI.Sprite;
+    private wheel: WheelView;
+    private wheelTongue: WheelTongueView;
+    private button: ButtonView;
 
     public initialize(): void {
-        
         const appOptions: any = {
             width: 800,
             height: 700,
@@ -17,35 +19,38 @@ export class TestGame {
             resolution: window.devicePixelRatio || 1
         };
         this.app = new PIXI.Application(appOptions);
+        // @ts-ignore
+        globalThis.__PIXI_APP__ = this.app;
         document.body.appendChild(this.app.view);
 
         this.container = new PIXI.Container();
         this.app.stage.addChild(this.container);
 
         this.loadResources();
+        this.app.ticker.add(this.update, this);
+    }
+    public update(deltaTime: number): void {
+        this.wheel.updateWheel(deltaTime);
     }
 
     protected loadResources(): void {
-        const wheelTexture: PIXI.Texture = PIXI.Texture.from('resources/wheel.png');
-        this.wheel = new PIXI.Sprite(wheelTexture);
-        this.wheel.pivot.set(190, 190);
-        this.wheel.x = 400;
-        this.wheel.y = 300;
-        this.container.addChild(this.wheel);
+        this.wheel = new WheelView(this.app);
+        this.wheelTongue = new WheelTongueView(this.app);
+        this.button = new ButtonView(this.app);
 
-        const tongueTexture: PIXI.Texture = PIXI.Texture.from('resources/wheel_tongue.png');
-        this.wheelTongue = new PIXI.Sprite(tongueTexture);
-        this.wheelTongue.pivot.set(27, 20);
-        this.wheelTongue.x = 400;
-        this.wheelTongue.y = 100;
-        this.container.addChild(this.wheelTongue);
+        this.container.addChild(this.wheel, this.wheelTongue, this.button);
 
-        const buttonTexture: PIXI.Texture = PIXI.Texture.from('resources/button.png');
-        this.button = new PIXI.Sprite(buttonTexture);
-        this.button.pivot.set(113, 55);
-        this.button.x = 400;
-        this.button.y = 550;
-        this.container.addChild(this.button);
+        const { clickSpinButton$ } = this.button;
+
+        clickSpinButton$.subscribe((value) => {
+            console.log('test', value);
+            this.startSpin();
+        });
+
+    }
+
+    private startSpin(): void {
+        this.wheel.spinWheel();
     }
 
 }

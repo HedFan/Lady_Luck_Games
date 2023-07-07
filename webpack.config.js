@@ -13,6 +13,7 @@ module.exports = (env) => {
 
     const common = {
         entry: path.join(PATHS.source, 'app.ts'),
+        devtool: 'cheap-module-source-map',
         output: {
             filename: '[name].js',
             path: PATHS.build
