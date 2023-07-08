@@ -35,7 +35,7 @@ module.exports = (env) => {
         resolve: {
             extensions: ['.tsx', '.ts', '.js']
         },
-       plugins: [
+        plugins: [
             new webpack.ProvidePlugin({
                 PIXI: 'pixi.js-legacy'
             }),
@@ -49,8 +49,11 @@ module.exports = (env) => {
             new TSLintPlugin({
                 files: ['./src/**/*.ts']
             })
-        ]
-    };
+        ],
+        devServer: {
+            disableHostCheck: true
+        },
+};
 
     return common;
 };
