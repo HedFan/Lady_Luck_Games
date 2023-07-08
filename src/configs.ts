@@ -51,14 +51,14 @@ export const WIN_VALUES_ANGLE: number[] = [0, 292, 237, 177, 120, 64];
 export const BREAKPOINTS: number[] = [0, 1.16, 2.15, 3.19, 4.17, 5.16, 6.26];
 export const LAST_BREAKPOINT: number = 6.26;
 export const TONGUE_BREAKPOINT: number[] = [0.4, 1.47, 2.5, 3.56, 4.56, 5.6];
-interface WheelHitArea {
+interface IWheelHitArea {
     readonly coords: ICoordinates;
     readonly radius: number;
 }
-export const WHEEL_HIT_AREA: WheelHitArea = {
+export const WHEEL_HIT_AREA: IWheelHitArea = {
     coords: { x: 191, y: 188 },
     radius: 180
-}
+};
 
 // debug giu
 export const GUI_POSITION: ICoordinates = {
