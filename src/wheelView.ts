@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { Observable, Subject } from 'rxjs';
+import { fromEvent, Observable, Subject } from 'rxjs';
 
 import {
     SPIN_DURATION,
@@ -9,32 +9,44 @@ import {
     BREAKPOINTS,
     LAST_BREAKPOINT,
     WHEEL_POSITION,
-    WHEEL_PIVOT, SPEED, TONGUE_BREAKPOINT
+    WHEEL_PIVOT,
+    SPEED,
+    TONGUE_BREAKPOINT,
+    WHEEL_HIT_AREA
 } from './configs';
 
 export class WheelView extends PIXI.Container {
     private readonly _sendWinValueSubject$ = new Subject<{ winValue: number }>();
     private readonly _sendTongueCollisionSubject$ = new Subject<void>();
-    private readonly _app: PIXI.Application;
     private readonly _wheel: PIXI.Sprite;
-    private _isSpinning = false;
     private _winContainers = new Array<PIXI.Text>();
     private _stopPosition: number | undefined;
     private _spinTimer: number | undefined;
     private _checkingTongueBreakpoint: number[];
+    private _isSpinning = false;
+    private _dragWheelTarget: undefined | PIXI.Sprite = undefined;
 
-    constructor(app: PIXI.Application) {
+    constructor() {
         super();
-        this._app = app;
         const wheelTexture: PIXI.Texture = PIXI.Texture.from('resources/wheel.png');
         this._wheel = new PIXI.Sprite(wheelTexture);
         this._wheel.pivot.copyFrom(WHEEL_PIVOT);
         this._wheel.position.copyFrom(WHEEL_POSITION);
+        this._wheel.interactive = true;
+        this._wheel.cursor = 'pointer';
+        const { coords, radius } = WHEEL_HIT_AREA;
+        this._wheel.hitArea = new PIXI.Circle(coords.x, coords.y, radius);
         this.addChild(this._wheel);
         for (let i = 0; i < WIN_VALUES.length; i++) {
             this._buildWinIndicator(i);
         }
         this._checkingTongueBreakpoint = TONGUE_BREAKPOINT;
+
+        this._wheel
+            .on('pointerdown', (event: PIXI.InteractionEvent) => this._startMoveWheel(event), this._wheel)
+            .on('pointerup', (event: PIXI.InteractionEvent) => this._stopMoveWheel(event), this._wheel)
+            .on('pointerupoutside', (event: PIXI.InteractionEvent) => this._stopMoveWheel(event))
+            .on('pointermove', (event: PIXI.InteractionEvent) => this._onDragMove(event));
     }
 
     public spinWheel(winValue?: number): void {
@@ -63,6 +75,7 @@ export class WheelView extends PIXI.Container {
     get sendWinValue$(): Observable<{ winValue: number }> {
         return this._sendWinValueSubject$;
     }
+    
     get sendTongueCollision$(): Observable<void> {
         return this._sendTongueCollisionSubject$;
     }
@@ -124,5 +137,32 @@ export class WheelView extends PIXI.Container {
                 this._checkingTongueBreakpoint = this._checkingTongueBreakpoint.slice(i + 1);
             }
         }
+    }
+
+    private _startMoveWheel(event: PIXI.InteractionEvent): void {
+        this._dragWheelTarget = this._wheel;
+    }
+    
+    private _stopMoveWheel(event: PIXI.InteractionEvent): void {
+        if (this._dragWheelTarget) {
+            this._dragWheelTarget.off('pointermove', this._onDragMove);
+            this._dragWheelTarget = undefined;
+        }
+    }
+    
+    private _onDragMove(event: PIXI.InteractionEvent): void {
+        if (this._isSpinning) {
+            this._wheel.cursor = 'default';
+            return;
+        }
+        if (this._dragWheelTarget === undefined) {
+            return;
+        }
+        this._wheel.cursor = 'pointer';
+        const { x, y } = event.data.originalEvent as PointerEvent;
+        const { position } = this._dragWheelTarget;
+        const dx = x - position.x;
+        const dy = y - position.y;
+        this._dragWheelTarget.rotation = Math.atan2(dy, dx);
     }
 }

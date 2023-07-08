@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 
 import { WheelView } from './wheelView';
-import { WheelTongueView } from "./wheelTongueView";
+import { WheelTongueView } from './wheelTongueView';
 import { ButtonView } from './buttonView';
 import { DebugView } from './debugView';
 
@@ -37,15 +37,15 @@ export class TestGame {
     }
 
     protected loadResources(): void {
-        this.wheel = new WheelView(this.app);
-        this.wheelTongue = new WheelTongueView(this.app);
-        this.button = new ButtonView(this.app);
+        this.wheel = new WheelView();
+        this.wheelTongue = new WheelTongueView();
+        this.button = new ButtonView();
         this.debug = new DebugView();
 
         this.container.addChild(this.wheel, this.wheelTongue, this.button);
 
         const { sendWinValue$, sendTongueCollision$ } = this.wheel;
-        this.button.clickSpinButton$.subscribe(() => this.startSpin());
+        this.button.clickSpinButton$.subscribe(() => this._startSpin());
 
         sendWinValue$.subscribe(({ winValue }) => {
             this.button.showResult(winValue);
@@ -56,13 +56,13 @@ export class TestGame {
         });
 
         this.debug.spinWithResult$.subscribe(({ winValue }) => {
-            this.startSpin(winValue);
+            this._startSpin(winValue);
             this.button.buttonClicked();
             this.button.changeButtonStateManually(true);
         });
     }
 
-    private startSpin(winValue?: number): void {
+    private _startSpin(winValue?: number): void {
         this.wheel.spinWheel(winValue);
     }
 }
